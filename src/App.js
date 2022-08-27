@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import ClientDetails from "./components/ClientDetails";
 import Dates from "./components/Dates";
 import Footer from "./components/Footer";
@@ -7,6 +7,8 @@ import Maindetails from "./components/Maindetails";
 import Notes from "./components/Notes";
 import Table from "./components/Table";
 import TableForm from "./components/TableForm";
+import ReactToPrint from "react-to-print";
+
 function App() {
     const [showInvoice,setShowInvoice] = useState(false)
     const [name,setName] = useState("")
@@ -27,23 +29,32 @@ function App() {
     const [price,setPrice] = useState("")
     const [amount,setAmount] = useState("")
     const [list,setList] = useState([])
+    const [total,setTotal] = useState(0)
+    const componentRef = useRef() 
     const handlePrint = () => {
         window.print()
     }
 
   return (
   <>
-  <main className="m-5 p-5 xl:grid grid-cols-2 gap-10 xl:items-start" >
+  <main className="m-5 p-5 md:max-w-xl md:mx-auto lg:max-w-2xl xl:max-w-4xl bg-white rounded-shadow" >
+
     {showInvoice ? 
-    <div>
-    <Header handlePrint={handlePrint}/>
-    <Maindetails name={name}  address={address}/>
-    <ClientDetails clientName={clientName} clientAddress={clientAddress}/>
-    <Dates invoiceNumber={invoiceNumber} invoiceDate={invoiceDate} dueDate={dueDate}/>
-    <Table description={description} quantity={quantity} price={price} amount={amount} list={list} setList={setList}/>
-    <Notes notes={notes}/>
-    <Footer name={name}  address={address} website={website} email={email} phone={phone} account={account} bankName={bankName}/>
-    </div > :(
+    <><ReactToPrint
+                      trigger={() => (
+                          <button className="bg-blue-500 ml-5 text-white mb-5 font-bold py-2 px-8 rounded shadow border-2 border-blue-500 hover:bg-transparent hover:text-blue-500 transition-all duration-300">
+                              Print / Download
+                          </button>
+                      )}
+                      content={() => componentRef.current} /><div ref={componentRef} className="p-5">
+                          <Header handlePrint={handlePrint} />
+                          <Maindetails name={name} address={address} />
+                          <ClientDetails clientName={clientName} clientAddress={clientAddress} />
+                          <Dates invoiceNumber={invoiceNumber} invoiceDate={invoiceDate} dueDate={dueDate} />
+                          <Table description={description} quantity={quantity} price={price} amount={amount} list={list} setList={setList} total={total} setTotal={setTotal} />
+                          <Notes notes={notes} />
+                          <Footer name={name} address={address} website={website} email={email} phone={phone} account={account} bankName={bankName} />
+                      </div></> :(
         <div className="flex flex-col justify-center">
          <article className="md:grid grid-cols-2 gap-10">
             <div className="flex flex-col">
@@ -114,7 +125,11 @@ function App() {
             amount={amount} 
             setAmount={setAmount} 
             list={list} 
-            setList={setList}/>
+            setList={setList}
+            total={total} 
+            setTotal={setTotal}
+            />
+            
         </article>
         <label htmlFor="notes">Additional Notes: </label>
         <textarea name="notes" id="notes" cols="30" rows="10" placeholder="Additional notes to the client" value={notes} onChange={(e) => setNotes(e.target.value)}></textarea>
